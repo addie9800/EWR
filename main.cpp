@@ -3,6 +3,8 @@
 #include "dense/DenseMatrix.hpp"
 #include "dense/DenseVector.hpp"
 #include "sparse/CSCMatrix.hpp"
+//TODO: Dieses Import Statement ersetzen: Keine gute Lösung 
+#include "dense/DenseVector.cpp"
 
 int main(int, char **) {
   DenseVector v{1, 2, 3};
