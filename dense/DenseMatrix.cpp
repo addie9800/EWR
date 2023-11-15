@@ -8,13 +8,18 @@ DenseMatrix::DenseMatrix(size_t rows, size_t cols, double default_value){
 }
 
 DenseMatrix::DenseMatrix(std::initializer_list<std::initializer_list<double>> init){
-    n_rows = 0;
-    n_cols = init.size();
-    for (std::initializer_list<double> i : init){
-        if (n_rows == 0) {
-            n_rows = i.size();
+    n_rows = init.size();
+    n_cols = init.begin()->size();
+    auto it = data.begin();
+    data.insert(it, n_rows * n_cols ,0);
+    int i = 0;
+    for (std::initializer_list<double> row : init) {
+        int j = 0;
+        for (double element : row) {
+            data[j * n_rows + i] = element;
+            j++;
         }
-        data.insert(data.end(), i.begin(), i.end());
+        i++;
     }
 }
 
@@ -23,14 +28,18 @@ DenseVector DenseMatrix::operator*(const DenseVector &rhs) const{
         std::cout << "Dimension mismatch!";
         return rhs;
     }
+    
     DenseVector result(n_rows, 0);
-    double tmp;
-    for (int i = 0; i < n_rows; i++){
-        
-        result[i] = 
+
+    for (int i = 0; i < n_cols; i++) {
+        for (int j = 0; j < n_rows; j++) {
+            result(j) += data[i * n_rows + j] * rhs(i);
+        }
     }
+
+    return result;
 }
 
 double DenseMatrix::operator()(size_t row, size_t col) const{
-    return data[(col - 1) * n_rows + row - 1];
+    return data[col * n_rows + row];
 }
