@@ -41,7 +41,7 @@ DenseVector DenseMatrix::operator*(const DenseVector &rhs) const{
 }
 
 double DenseMatrix::operator()(size_t row, size_t col) const{
-    if (row < 0 || n_rows < row || col < 0 || n_cols < col) {
+    if (row < 0 || n_rows - 1 < row || col < 0 || n_cols - 1 < col) {
         std::cout << "Dimension mismatch!";
         return 0;
     }
