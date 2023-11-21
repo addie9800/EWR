@@ -30,6 +30,9 @@ public:
   // basic linear algebra operations
   DenseVector operator*(const DenseVector &rhs) const;
 
+  // Blatt 4: SpGEMM
+  CSCMatrix operator*(const CSCMatrix &rhs) const;
+
   // value access
   double operator()(size_t row, size_t col) const;
 

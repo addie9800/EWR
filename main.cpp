@@ -3,6 +3,9 @@
 #include "dense/DenseMatrix.hpp"
 #include "dense/DenseVector.hpp"
 #include "sparse/CSCMatrix.hpp"
+#include "dense/DenseMatrix.cpp"
+#include "dense/DenseVector.cpp"
+#include "sparse/CSCMatrix.cpp"
 //TODO: Diese Import Statements ersetzen: Keine gute Lösung; ohne sie werden die implementierten Funktionen nicht geladen
 
 int main(int, char **) {
@@ -31,9 +34,10 @@ int main(int, char **) {
   std::cout << "Au = " << D * u << "\n"; // (1, 1) */
 
 
-  CSCMatrix B(3, 2, {{0, 0, 2}, {2, 1, -4}, {0, 1, 3}, {2,0,1}});
+  CSCMatrix B(2, 2, {{0, 0, 2}, {1, 1, -4}, {0, 1, 3}, {1,0,1}});
   // 2 3
   // 0 0
   // 0 -4
   std::cout << "B:\n" << B << "\n";
+  std::cout << "B:\n" << B*B << "\n";
 }

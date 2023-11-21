@@ -1,4 +1,5 @@
 #include "CSCMatrix.hpp"
+#include <list> 
 //#include "../dense/DenseMatrix.hpp"
 
 // Constructor for the CSC Matrix with default value
@@ -79,7 +80,7 @@ CSCMatrix::CSCMatrix(size_t rows, size_t cols, std::initializer_list<Triplet> tr
             continue;
         }
 		// Checking for input values to corresponding to previously set dimentions, if encountered the contructor exits with an error message
-        if (t.row < 0 || n_rows -1 < t.row || t.col < 0 || n_cols - 1 < t.col) {
+        if (t.row < 0 || n_rows - 1 < t.row || t.col < 0 || n_cols - 1 < t.col) {
             std::cout << "Dimension mismatch!";
             *this = {rows, cols, 0};
             break;
@@ -137,6 +138,33 @@ DenseVector CSCMatrix::operator*(const DenseVector &rhs) const {
     return result;
 }
 
+CSCMatrix CSCMatrix::operator*(const CSCMatrix &rhs) const {
+	// Dimension Verification, returns unchanged Matrix on error
+    if (rhs.rows() != n_cols){
+        std::cout << "Dimension mismatch!";
+        return rhs;
+    }
+    // Since the operator is passed as a constant we need to initiaize a new result matrix
+    DenseMatrix result(n_rows, rhs.cols(), 0);
+	std::list<DenseVector> rhs_cols{};
+    for (int i = 0; i < rhs.cols(); i++){
+        DenseVector tmp(rhs.rows(), 0);
+        // get the correct start index for jr from ic
+        int col_index_start = IC[i] - 1;
+        int diff = IC[i + 1] - 1 - col_index_start;
+        // iterate over all relevant values in jr (before the new row starts)
+        for (int j = 0; j < diff; j++) {
+            int tmp_col = JR[col_index_start + j] - 1;
+            if (tmp_col == i) {
+                // copy the value of the matrix column to column vector
+                tmp(i) = rhs.Num[col_index_start + j];
+            }
+        }
+        rhs_cols.insert(rhs_cols.end(), tmp);
+    }
+    return result;
+}
+
 // implementation of access to matrix elements
 
 double CSCMatrix::operator()(size_t row, size_t col) const {
@@ -154,10 +182,6 @@ double CSCMatrix::operator()(size_t row, size_t col) const {
         if (tmp_col == col) {
 			//return the numerical value if it exists
             return Num[col_index_start + i];
-        }
-        if (tmp_col > col) {
-			// break the loop if you pass the index, in which case 0 can be returned.
-            break;
         }
     }
     return 0;
