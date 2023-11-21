@@ -3,9 +3,6 @@
 #include "dense/DenseMatrix.hpp"
 #include "dense/DenseVector.hpp"
 #include "sparse/CSCMatrix.hpp"
-#include "dense/DenseMatrix.cpp"
-#include "dense/DenseVector.cpp"
-#include "sparse/CSCMatrix.cpp"
 //TODO: Diese Import Statements ersetzen: Keine gute Lösung; ohne sie werden die implementierten Funktionen nicht geladen
 
 int main(int, char **) {

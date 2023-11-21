@@ -145,22 +145,20 @@ CSCMatrix CSCMatrix::operator*(const CSCMatrix &rhs) const {
         return rhs;
     }
     // Since the operator is passed as a constant we need to initiaize a new result matrix
-    DenseMatrix result(n_rows, rhs.cols(), 0);
-	std::list<DenseVector> rhs_cols{};
-    for (int i = 0; i < rhs.cols(); i++){
-        DenseVector tmp(rhs.rows(), 0);
-        // get the correct start index for jr from ic
+    CSCMatrix result(n_rows, rhs.cols(), 0);
+
+    DenseVector rhs_cols[rhs.cols()] = {DenseVector(rhs.rows(), 0)};
+    std::fill_n(rhs_cols, rhs.cols(), DenseVector(rhs.rows(), 0));
+
+    for (int i = 0; i < rhs.rows(); i++){
         int col_index_start = IC[i] - 1;
         int diff = IC[i + 1] - 1 - col_index_start;
         // iterate over all relevant values in jr (before the new row starts)
         for (int j = 0; j < diff; j++) {
-            int tmp_col = JR[col_index_start + j] - 1;
-            if (tmp_col == i) {
-                // copy the value of the matrix column to column vector
-                tmp(i) = rhs.Num[col_index_start + j];
-            }
+            rhs_cols[JR[j] - 1](i) = rhs(i, JR[j] - 1);
         }
-        rhs_cols.insert(rhs_cols.end(), tmp);
+
+
     }
     return result;
 }
