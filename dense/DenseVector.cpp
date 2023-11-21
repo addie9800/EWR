@@ -1,15 +1,22 @@
 #include "DenseVector.hpp"
 
+// Constructor with default value
+
 DenseVector::DenseVector(size_t size, double default_value){
     auto it = data.begin();
-    data.insert(it, size ,default_value);
+    data.insert(it, size, default_value);
 }
+
+// Constructor with initializer list
 
 DenseVector::DenseVector(std::initializer_list<double> init){
     data = init;
 }
 
+// elementwise addition using += operator 
+
 DenseVector& DenseVector::operator+=(const DenseVector &rhs){
+	// Dimension Verification, returns unchanged vector on error
     if (rhs.size()!= data.size()){
         std::cout << "Sizes don't match, input unchanged!\n";
         return *this;
@@ -20,6 +27,8 @@ DenseVector& DenseVector::operator+=(const DenseVector &rhs){
     return *this;
 }
 
+// scalar multiplication using *= operator
+
 DenseVector& DenseVector::operator*=(double rhs){
     for (int i = 0; i < data.size(); i++){
         data[i] *= rhs;
@@ -27,11 +36,16 @@ DenseVector& DenseVector::operator*=(double rhs){
     return *this;
 }
 
+// scalar division using /= operator. implementaion using previously implemented *= operator and 1/rhs (division of doubles)
+
 DenseVector& DenseVector::operator/=(double rhs){
     return *this *= 1/rhs;
 }
 
+// elementwise subtraction using -= operator
+
 DenseVector& DenseVector::operator-=(const DenseVector &rhs){
+	// Dimension Verification, returns unchanged vector on error
     if (rhs.size()!= data.size()){
         std::cout << "Sizes don't match, input unchanged!\n";
         return *this;
@@ -42,7 +56,10 @@ DenseVector& DenseVector::operator-=(const DenseVector &rhs){
     return *this;
 }
 
+// computation of the scalar product of two vectors
+
 double DenseVector::operator*(const DenseVector &rhs) const{
+	// Dimension Verification, returns unchanged vector on error
     if (rhs.size()!= data.size()){
         std::cout << "Sizes don't match, input unchanged!\n";
         return 0;
@@ -54,9 +71,13 @@ double DenseVector::operator*(const DenseVector &rhs) const{
     return tmp;
 }
 
+// implementation of read-write element access
+
 double& DenseVector::operator()(size_t idx){
     return data[idx];
 }
+
+// implementation of read-only element access
 
 double DenseVector::operator()(size_t idx) const{
     return data[idx];
