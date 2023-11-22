@@ -2,6 +2,7 @@
 #define CSCMATRIX_HPP
 
 #include <vector>
+#include <list>
 
 #include "../dense/DenseMatrix.hpp"
 #include "../dense/DenseVector.hpp"
@@ -26,6 +27,8 @@ public:
   CSCMatrix(const DenseMatrix &mat);
   CSCMatrix(size_t rows, size_t cols,
             std::initializer_list<Triplet> triplet_init);
+  CSCMatrix(size_t rows, size_t cols,
+            std::list<Triplet> triplet_init);
 
   // basic linear algebra operations
   DenseVector operator*(const DenseVector &rhs) const;

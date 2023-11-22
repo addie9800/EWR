@@ -138,28 +138,91 @@ DenseVector CSCMatrix::operator*(const DenseVector &rhs) const {
     return result;
 }
 
+CSCMatrix::CSCMatrix(size_t rows, size_t cols, std::list<Triplet> triplet_init){
+    n_rows = rows;
+    n_cols = cols;
+
+    for (int i = 0; i < n_rows + 1; i++) {
+		// initialization of IC to the equivalent of an empty matrix (all columns data start at index 1 for num array length of 0)
+        IC.insert(IC.end(), 1);
+    }
+	// Iteration over all triplets in initializer_list
+    for (Triplet t : triplet_init){
+		// if the value is zero it can be skipped, since zero values are omitted in this data type
+        if (t.value == 0) {
+            continue;
+        }
+		// Checking for input values to corresponding to previously set dimentions, if encountered the contructor exits with an error message
+        if (t.row < 0 || n_rows - 1 < t.row || t.col < 0 || n_cols - 1 < t.col) {
+            std::cout << "Dimension mismatch!";
+            *this = {rows, cols, 0};
+            break;
+        }
+		// Entering a value leads to a shift of the starting indices of all subsequent rows. Hence the values in IC are all incremented starting from the current positiom
+        for (int i = t.row + 1; i < n_rows + 1; i++) {
+            IC[i]++;
+        }
+		// If there are no previous entries in this row, so the entry can just be added to the end
+        if (IC[t.row] == IC[t.row + 1] - 1) {
+            JR.insert(JR.begin() + IC[t.row] - 1, t.col + 1);
+            Num.insert(Num.begin() + IC[t.row] - 1, t.value);
+        } else {
+			// else you need to identify the correct place to insert the entry since for each row the entries are sorted in ascending order
+            int index = 0;
+            for (int i = IC[t.row] - 1; i < IC[t.row + 1] - 2; i++) {
+                index = i;
+                int tmp_col = JR[i] - 1;
+				// Input verification. if a value is defined more than once, the contructor return with an error mes
+                if (tmp_col == t.col) {
+                    std::cout << "Value defined more than once!";
+                    *this = {rows, cols, 0};
+                    return;
+                }
+                if (tmp_col > t.col) {
+					// when the column number is higher than the target column number we reduce the index by one, so that value will be inserted before
+                    index--;
+                    break;
+                }
+            }
+			// insertion of value into jr and num
+            JR.insert(JR.begin() + index + 1, t.col + 1);
+            Num.insert(Num.begin() + index + 1, t.value);
+        }
+    }
+}
+
 CSCMatrix CSCMatrix::operator*(const CSCMatrix &rhs) const {
 	// Dimension Verification, returns unchanged Matrix on error
     if (rhs.rows() != n_cols){
         std::cout << "Dimension mismatch!";
         return rhs;
     }
-    // Since the operator is passed as a constant we need to initiaize a new result matrix
-    CSCMatrix result(n_rows, rhs.cols(), 0);
 
     DenseVector rhs_cols[rhs.cols()] = {DenseVector(rhs.rows(), 0)};
     std::fill_n(rhs_cols, rhs.cols(), DenseVector(rhs.rows(), 0));
-
     for (int i = 0; i < rhs.rows(); i++){
         int col_index_start = IC[i] - 1;
         int diff = IC[i + 1] - 1 - col_index_start;
         // iterate over all relevant values in jr (before the new row starts)
-        for (int j = 0; j < diff; j++) {
+        for (int j = i; j < i + diff; j++) {
             rhs_cols[JR[j] - 1](i) = rhs(i, JR[j] - 1);
         }
-
-
     }
+    // Transformation of column vectors
+    std::list<Triplet> result_list{};
+    for (int i = 0; i < rhs.cols(); i++){
+        DenseVector current = rhs_cols[i]; 
+        current = *this * current;
+        rhs_cols[i] = current;
+        for (int j = 0; j < current.size(); j++){
+            if (current(j) != 0){
+                Triplet trip{static_cast<size_t> (j), static_cast<size_t>(i), current(j)};
+                result_list.insert(result_list.end(), trip);
+            } 
+        } 
+    }
+    // Since the operator is passed as a constant we need to initiaize a new result matrix
+    CSCMatrix result(n_rows, rhs.cols(), result_list);
     return result;
 }
 
@@ -183,4 +246,4 @@ double CSCMatrix::operator()(size_t row, size_t col) const {
         }
     }
     return 0;
-}
+} 
