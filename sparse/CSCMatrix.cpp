@@ -138,6 +138,10 @@ DenseVector CSCMatrix::operator*(const DenseVector &rhs) const {
     return result;
 }
 
+// Constructor using a list of triplets
+// This extra constructor is necessary, because we want to be able to construct a CSCMatrix from a "normal" list and not only a initializer list.
+// This is because one cannot iteratively construct an initializer list.
+
 CSCMatrix::CSCMatrix(size_t rows, size_t cols, std::list<Triplet> triplet_init){
     n_rows = rows;
     n_cols = cols;
@@ -191,29 +195,35 @@ CSCMatrix::CSCMatrix(size_t rows, size_t cols, std::list<Triplet> triplet_init){
     }
 }
 
+// implementation of matrix matrix multiplication
+
 CSCMatrix CSCMatrix::operator*(const CSCMatrix &rhs) const {
 	// Dimension Verification, returns unchanged Matrix on error
     if (rhs.rows() != n_cols){
         std::cout << "Dimension mismatch!";
         return rhs;
     }
-
+    // First, we split the matrix into its columns. Before that the list of columns is just a list of empty vectors
     DenseVector rhs_cols[rhs.cols()] = {DenseVector(rhs.rows(), 0)};
     std::fill_n(rhs_cols, rhs.cols(), DenseVector(rhs.rows(), 0));
+    // Then we copy the values from the rhs matrix to the list of vectors
     for (int i = 0; i < rhs.rows(); i++){
-        int col_index_start = IC[i] - 1;
-        int diff = IC[i + 1] - 1 - col_index_start;
+        int col_index_start = rhs.IC[i] - 1;
+        int diff = rhs.IC[i + 1] - 1 - col_index_start;
         // iterate over all relevant values in jr (before the new row starts)
         for (int j = i; j < i + diff; j++) {
-            rhs_cols[JR[j] - 1](i) = rhs(i, JR[j] - 1);
+            rhs_cols[rhs.JR[j] - 1](i) = rhs(i, rhs.JR[j] - 1);
         }
     }
-    // Transformation of column vectors
+    // All the column vectors are multiplied with the lhs matrix to get a list of column vectors which span the result matrix.
+    // These vectors are then transformed into Triplets, which are used to create the result matrix.
     std::list<Triplet> result_list{};
     for (int i = 0; i < rhs.cols(); i++){
         DenseVector current = rhs_cols[i]; 
+        // Creating the result vector by matrix vector multiplication
         current = *this * current;
         rhs_cols[i] = current;
+        // Transforming the result vector into Triplets and adding them to the list of Triplets
         for (int j = 0; j < current.size(); j++){
             if (current(j) != 0){
                 Triplet trip{static_cast<size_t> (j), static_cast<size_t>(i), current(j)};
