@@ -30,6 +30,10 @@ public:
   CSCMatrix(size_t rows, size_t cols,
             std::list<Triplet> triplet_init);
 
+  // Blatt 5
+  // Read CSCMatrix from files. Creates a square matrix of size system_size.
+  CSCMatrix(std::string path, size_t system_size);
+
   // basic linear algebra operations
   DenseVector operator*(const DenseVector &rhs) const;
 

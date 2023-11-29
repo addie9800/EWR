@@ -1,5 +1,19 @@
 #include "DenseVector.hpp"
 
+#include <fstream>
+
+DenseVector::DenseVector(std::string path) {
+  path += "/b.bin";
+  std::fstream stream(path, std::ios::binary | std::ios::in | std::ios::ate);
+  const size_t size = stream.tellg() / sizeof(double);
+  stream.close();
+  data.resize(size);
+
+  std::ifstream read_stream(path, std::ios::binary);
+  read_stream.read(reinterpret_cast<char *>(&data[0]), size * sizeof(double));
+  read_stream.close();
+}
+
 // Constructor with default value
 
 DenseVector::DenseVector(size_t size, double default_value){

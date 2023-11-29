@@ -2,6 +2,73 @@
 #include <list> 
 //#include "../dense/DenseMatrix.hpp"
 
+#include <algorithm>
+#include <fstream>
+
+template <class Type> size_t length_of_file(const std::string &path) {
+  std::fstream stream(path, std::ios::binary | std::ios::in | std::ios::ate);
+  size_t length = stream.tellg() / sizeof(Type);
+  stream.close();
+  return length;
+}
+
+// Reads a binary file that stores a sequence of values with type 'Type' and
+// returns them as a std::vector<Type>
+template <class Type> std::vector<Type> read_vec(const std::string &path) {
+  const size_t size = length_of_file<Type>(path);
+  std::vector<Type> to_read(size);
+
+  std::ifstream read_stream(path, std::ios::binary);
+  read_stream.read(reinterpret_cast<char *>(&to_read[0]), size * sizeof(Type));
+  read_stream.close();
+
+  return to_read;
+}
+
+CSCMatrix::CSCMatrix(std::string path, size_t n)
+    : n_rows(n), n_cols(n), IC(n_cols + 1) {
+
+  auto rows_data = read_vec<uint64_t>(path + "/rows.bin");
+  auto cols_data = read_vec<uint64_t>(path + "/cols.bin");
+  auto vals_data = read_vec<double>(path + "/vals.bin");
+
+  JR.reserve(vals_data.size());
+  Num.reserve(vals_data.size());
+
+  // count number of elements for each column
+  for (auto &col : cols_data)
+    ++IC[col];
+
+  // compute prefix sums. IC now contains correct data
+  for (size_t i = 0, prefix_sum = 0; i < cols(); ++i) {
+    auto nnz_ith_col = IC[i];
+    IC[i] = prefix_sum;
+    prefix_sum += nnz_ith_col;
+  }
+  IC.back() = vals_data.size(); // last entry of IC
+
+  // compute row indices for each entry
+  for (size_t i = 0; i < vals_data.size(); ++i) {
+    // for (auto &trip : triplet_init) {
+    auto col_start = IC[cols_data.at(i)];
+
+    JR[col_start] = rows_data.at(i);
+    Num[col_start] = vals_data.at(i);
+
+    // just for now: increase the start index of the current column so we know
+    // where to insert the next value.
+    // we will fix IC after this loop.
+    ++IC[cols_data.at(i)];
+  }
+
+  // fix IC
+  for (size_t i = 0, first_idx_of_col = 0; i <= cols(); ++i) {
+    size_t next_col = IC[i];
+    IC[i] = first_idx_of_col;
+    first_idx_of_col = next_col;
+  }
+}
+
 // Constructor for the CSC Matrix with default value
 
 CSCMatrix::CSCMatrix(size_t rows, size_t cols, double default_value) {
