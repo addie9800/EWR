@@ -78,7 +78,7 @@ double DenseVector::operator*(const DenseVector &rhs) const{
         std::cout << "Sizes don't match, input unchanged!\n";
         return 0;
     }
-    int tmp = 0;
+    double tmp = 0.0;
     for (int i = 0; i < data.size(); i++){
         tmp += data[i] * rhs.data[i];
     }

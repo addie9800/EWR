@@ -16,6 +16,9 @@ public:
   // constructor: vector is initialized to the values in init
   DenseVector(std::initializer_list<double> init);
 
+  // read vector from file
+  DenseVector(std::string path);
+
   // Basic math operations
   DenseVector &operator+=(const DenseVector &rhs);
   DenseVector &operator-=(const DenseVector &rhs);
