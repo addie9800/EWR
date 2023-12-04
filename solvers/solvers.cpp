@@ -20,7 +20,7 @@ DenseVector solvers::conjugateGradient(const CSCMatrix &A, const DenseVector &b,
     DenseVector v = x;
     double lambda = 0.0;
 
-    std::cout << "iteration, error \n";
+    //std::cout << "iteration, error \n";
 
     // While the residuum is not zero, i.e. bigger than the tolerance, we have to improve the solution
     while (alpha > tolerance) {
@@ -33,7 +33,7 @@ DenseVector solvers::conjugateGradient(const CSCMatrix &A, const DenseVector &b,
         p = r + (p * (alpha / alphaold));
 
         // Writes the current itration and residuum to the output
-        std::cout << t++ << "," << alpha << "\n";
+        // std::cout << t++ << "," << alpha << "\n";
     }
 
     return x;
