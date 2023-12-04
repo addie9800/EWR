@@ -2,7 +2,7 @@
 #include <cmath>
 
 DenseVector solvers::conjugateGradient(const CSCMatrix &A, const DenseVector &b, double tolerance){
-    DenseVector x = DenseVector(A.cols(), 0);
+    DenseVector x = DenseVector(A.cols(), 0.0);
     // Dimension Verification, returns 0 vector on error
     if (A.rows() != b.size()) {
         std::cout << "Dimension mismatch!";
@@ -18,7 +18,9 @@ DenseVector solvers::conjugateGradient(const CSCMatrix &A, const DenseVector &b,
     int t = 0;
 
     DenseVector v = x;
-    double lambda = 0;
+    double lambda = 0.0;
+
+    std::cout << "iteration, error \n";
 
     // While the residuum is not zero, i.e. bigger than the tolerance, we have to improve the solution
     while (alpha > tolerance) {
@@ -26,12 +28,12 @@ DenseVector solvers::conjugateGradient(const CSCMatrix &A, const DenseVector &b,
         lambda = alpha / (v * p);
         x = x + (p * lambda);
         r = r - (v * lambda);
+        alphaold = alpha;
         alpha = r*r;
         p = r + (p * (alpha / alphaold));
-        alphaold = alpha;
 
         // Writes the current itration and residuum to the output
-        std::cout << "Iteration: " << t++ << "; Error: " << sqrt(alpha) << "\n"; // TODO: Muss hier sqrt(alpha) oder alpha sein?
+        std::cout << t++ << "," << alpha << "\n";
     }
 
     return x;

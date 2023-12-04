@@ -196,9 +196,15 @@ DenseVector CSCMatrix::operator*(const DenseVector &rhs) const {
     // Since the operator is passed as a constant we need to initiaize a new result vector
     DenseVector result(n_rows, 0);
 	// the matrix vector multiplication is again done by the default way, with the difference that many operations can be skipped due to most values within the matrix being zero.
-    for (int i = 0; i < n_rows; i++) {
+    /*for (int i = 0; i < n_rows; i++) {
         for (int j = IC[i]-1; j < IC[i+1]-1; j++) {
             result(i) += rhs(JR[j]-1) * Num[j];
+        }
+    }*/ // ALTE MATRIX-VEKTOR MULTIPLIKATION
+
+    for (size_t j = 0; j < cols(); ++j) {
+        for (size_t d = IC[j]; d < IC[j + 1]; ++d) {
+        result(JR[d]) += Num[d] * rhs(j);
         }
     }
 

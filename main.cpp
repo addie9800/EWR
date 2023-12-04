@@ -48,8 +48,9 @@ int main(int, char **) {
 
   // AB HIER BLATT 5
 
+  /*
   // Tests
-/*   DenseVector u = {-23.345, 65.88};
+  DenseVector u = {-23.345, 65.88};
 
   CSCMatrix A = {{0.3343, 3.1414}, {3.1414, 123.456}};
 
@@ -62,14 +63,15 @@ int main(int, char **) {
   auto x = solvers::conjugateGradient(T, t);
 
   std::cout << "CG result: " << x << "\n";
-  std::cout << "Matrix-Vector Product: " << T*x << "\n"; */
+  std::cout << "Matrix-Vector Product: " << T*x << "\n"; //*/
 
-  CSCMatrix A("../sparse-systems/system-01/", 100);
-  DenseVector b("../sparse-systems/system-01/");
+  ///*
+  CSCMatrix A("../sparse-systems/system-03/", 5000);
+  DenseVector b("../sparse-systems/system-03/");
 
   auto x = solvers::conjugateGradient(A, b);
 
-  std::cout << "CG result: " << x << "\n";
+  //std::cout << "CG result: " << x << "\n";//*/
 
 
   return 0;
