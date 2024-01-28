@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   // create distributed matrix/vector objects
   // DCSCMatrix A{n, n, triplets};
   DVector b = DVector(b_vals);
-
+  std::cout << b;
   // SpMV and print result
   //auto c = A * b;
   //std::cout << c;
