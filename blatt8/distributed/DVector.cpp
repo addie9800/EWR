@@ -6,10 +6,12 @@ DVector::DVector(std::vector<double> init) {
   MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
   int k = init.size()/std::sqrt(comm_size);
-  offset = (int comm_rank / std::sqrt(comm_size)) * k;
+  offset = (int (comm_rank / std::sqrt(comm_size))) * k;
 
-  data = DenseVector(init(init.begin() + offset, init.begin() + offset + k));
-  std::cout << "Proc. " << comm_rank << "has vec " << data;
+  std::vector<double> local_init(init.begin() + offset, init.begin() + offset + k);
+
+  data = DenseVector(local_init);
+  // std::cout << "Proc. " << comm_rank << "has vec " << data << "\n";
 }
 
 std::ostream &operator<<(std::ostream &os, const DVector &vec) {

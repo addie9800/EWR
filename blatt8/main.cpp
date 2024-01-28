@@ -1,7 +1,7 @@
 #include <mpi.h>
 #include <numeric>
 
-#include "distributed/DCSCMatrix.hpp"
+//#include "distributed/DCSCMatrix.hpp"
 #include "distributed/DVector.hpp"
 #include <cmath>
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   
   const size_t n =
       std::sqrt(size) * 3; // matrix size depends on number of processes
-  
+  /*
   // create matrix data - this example is a matrix with 1 on the main diagonal
   // and 2 where i and j are multiple of 4.
   std::vector<Triplet> triplets;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   std::iota(b_vals.begin(), b_vals.end(), 0);
 
   // create distributed matrix/vector objects
-  DCSCMatrix A{n, n, triplets};
+  // DCSCMatrix A{n, n, triplets};
   DVector b = DVector(b_vals);
 
   // SpMV and print result
