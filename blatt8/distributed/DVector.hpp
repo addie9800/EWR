@@ -4,11 +4,12 @@
 #include "../dense/DenseVector.hpp"
 #include <mpi.h>
 #include <vector>
+#include <iostream>
 
 class DVector {
   int comm_size, comm_rank;
   size_t offset;
-  DenseVector data;
+  DenseVector data = DenseVector(1,0);
 
 public:
   // constructor: takes a list of values and stores them as distributed vector.

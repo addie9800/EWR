@@ -30,6 +30,10 @@ DCSCMatrix::DCSCMatrix(size_t rows, size_t cols, std::vector<Triplet> triplets){
     std::cout << data;
 } 
 
+DVector& DCSCMatrix::operator*(const DVector &rhs) const {
+    //TODO
+}
+
 DCSCMatrix::~DCSCMatrix()
 {
 }
