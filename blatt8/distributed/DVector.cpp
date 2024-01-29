@@ -5,11 +5,9 @@ DVector::DVector(std::vector<double> init) {
   MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-  if (init.size() % int (std::sqrt(comm_size)) != 0)
-  {
+  if (init.size() % int (std::sqrt(comm_size)) != 0) {
       throw std::invalid_argument("n should be multiple of sqrt(p)!");
-  }else if (std::floor(std::sqrt(comm_size)) != std::sqrt(comm_size))
-  {
+  } else if (std::floor(std::sqrt(comm_size)) != std::sqrt(comm_size)) {
       throw std::invalid_argument("p should be quadratic! p is " + std::to_string(comm_size));
   }
 
@@ -19,7 +17,6 @@ DVector::DVector(std::vector<double> init) {
   std::vector<double> local_init(init.begin() + offset, init.begin() + offset + k);
 
   data = DenseVector(local_init);
-  // std::cout << "Proc. " << comm_rank << "has vec " << data << "\n";
 }
 
 std::ostream &operator<<(std::ostream &os, const DVector &vec) {
@@ -43,8 +40,7 @@ std::ostream &operator<<(std::ostream &os, const DVector &vec) {
       } 
     } 
     os << ")^T\n";
-  } else if (vec.comm_rank / int(std::sqrt(vec.comm_size)) == 0)
-  {
+  } else if (vec.comm_rank / int(std::sqrt(vec.comm_size)) == 0) {
     for (int i = 0; i < vec.data.size(); i++){
       // send the local data to the root process
       int current = vec.data(i);
@@ -52,7 +48,6 @@ std::ostream &operator<<(std::ostream &os, const DVector &vec) {
     } 
     
   }
-  
 
   return os;
 }
