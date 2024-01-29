@@ -5,6 +5,14 @@ DVector::DVector(std::vector<double> init) {
   MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
+  if (init.size() % int (std::sqrt(comm_size)) != 0)
+  {
+      throw std::invalid_argument("n should be multiple of sqrt(p)!");
+  }else if (std::floor(std::sqrt(comm_size)) != std::sqrt(comm_size))
+  {
+      throw std::invalid_argument("p should be quadratic! p is " + std::to_string(comm_size));
+  }
+
   int k = init.size()/std::sqrt(comm_size);
   offset = (int (comm_rank / std::sqrt(comm_size))) * k;
 

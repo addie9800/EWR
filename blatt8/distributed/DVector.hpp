@@ -9,9 +9,9 @@
 class DVector {
   int comm_size, comm_rank;
   size_t offset;
-  DenseVector data = DenseVector(1,0);
 
 public:
+  DenseVector data = DenseVector(1,0); // Ist das erlaubt?
   // constructor: takes a list of values and stores them as distributed vector.
   // the list is sliced and only the local part is stored.
   DVector(std::vector<double> init);

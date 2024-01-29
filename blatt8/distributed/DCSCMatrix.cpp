@@ -29,10 +29,55 @@ DCSCMatrix::DCSCMatrix(size_t rows, size_t cols, std::vector<Triplet> triplets){
     data = CSCMatrix(s, s, subvector_triplets);
     std::cout << data;
 } 
-/*
+
 DVector DCSCMatrix::operator*(const DVector &rhs) const {
-    //TODO
-}*/
+	/*// Dimension Verification, returns unchanged vector on error
+    if (rhs.size() != cols){
+        throw std::invalid_argument("Dimension mismatch!");
+        return rhs;
+    }*/
+    int comm_size;
+    int comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+
+    DenseVector local_result = data * rhs.data;
+    int local_manager = comm_rank - (comm_rank % int(std::sqrt(comm_size)));
+
+    if (local_manager != comm_rank) {
+        for (int i = 0; i < local_result.size(); i++){
+            int current = local_result(i);
+            MPI_Send(&current, 1, MPI_INT, local_manager, 0, MPI_COMM_WORLD);
+        }
+    } else {
+        for (int i = 0; i < local_result.size(); i++){
+            for (int j = 1; j < int(std::sqrt(comm_size)); j++) {
+                int current_recv = 0;
+                MPI_Recv(&current_recv, 1, MPI_INT, comm_rank + j, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                local_result(i) += current_recv;
+            }
+        }
+
+        for (int i = 0; i < local_result.size(); i++){
+            int current = local_result(i);
+            MPI_Send(&current, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        }
+
+        if (comm_rank == 0) {
+            std::vector<double> result(local_result.size() * int(std::sqrt(comm_size)));
+
+            for (int j = 0; j < int(std::sqrt(comm_size)); j++) {
+                int current_rank = j * int(std::sqrt(comm_size));
+                for (int i = 0; i < local_result.size(); i++){
+                    int current_recv = 0;
+                    MPI_Recv(&current_recv, 1, MPI_INT, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    result[current_rank + i] = current_recv;
+                }
+            }
+            return DVector(result);
+        }
+    }
+}
 
 DCSCMatrix::~DCSCMatrix()
 {
