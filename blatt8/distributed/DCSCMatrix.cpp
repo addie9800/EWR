@@ -27,7 +27,7 @@ DCSCMatrix::DCSCMatrix(size_t rows, size_t cols, std::vector<Triplet> triplets){
         }
     }
     data = CSCMatrix(s, s, subvector_triplets);
-    std::cout << data;
+    //std::cout << data;
 } 
 
 DVector DCSCMatrix::operator*(const DVector &rhs) const {
@@ -40,9 +40,10 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
     int comm_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
-
+    std::cout << "Test";
     DenseVector local_result = data * rhs.data;
     int local_manager = comm_rank - (comm_rank % int(std::sqrt(comm_size)));
+    std::vector<double> result(rhs.data.size() * int(std::sqrt(comm_size)));
 
     if (local_manager != comm_rank) {
         for (int i = 0; i < local_result.size(); i++){
@@ -64,8 +65,7 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
         }
 
         if (comm_rank == 0) {
-            std::vector<double> result(local_result.size() * int(std::sqrt(comm_size)));
-
+            
             for (int j = 0; j < int(std::sqrt(comm_size)); j++) {
                 int current_rank = j * int(std::sqrt(comm_size));
                 for (int i = 0; i < local_result.size(); i++){
@@ -74,11 +74,24 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
                     result[current_rank + i] = current_recv;
                 }
             }
+            for (int j = 0; j < result.size(); j++){
+                int current = result.at(j);
+                MPI_Bcast(&current, 1, MPI_INT, 0, MPI_COMM_WORLD);
+            } 
+            std::cout << comm_rank;
             return DVector(result);
         }
     }
+    if(comm_rank > 0){
+        for (int j = 0; j < result.size(); j++){
+            int current_recv = 0;
+            MPI_Recv(&current_recv, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            result.at(j) = current_recv;
+        } 
+    }
+    std::cout << comm_rank;
+    return DVector(result);
 }
-
 DCSCMatrix::~DCSCMatrix()
 {
 }
