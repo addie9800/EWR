@@ -27,7 +27,6 @@ DCSCMatrix::DCSCMatrix(size_t rows, size_t cols, std::vector<Triplet> triplets){
         }
     }
     data = CSCMatrix(s, s, subvector_triplets);
-    //std::cout << data;
 } 
 
 DVector DCSCMatrix::operator*(const DVector &rhs) const {
@@ -44,7 +43,7 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
     DenseVector local_result = data * rhs.data;
     int local_manager = comm_rank - (comm_rank % int(std::sqrt(comm_size)));
     std::vector<double> result(rhs.data.size() * int(std::sqrt(comm_size)));
-
+    std::cout << comm_rank << ": " << rhs.data << "\n";
     if (local_manager != comm_rank) {
         for (int i = 0; i < local_result.size(); i++){
             int current = local_result(i);
@@ -58,7 +57,6 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
                 local_result(i) += current_recv;
             }
         }
-        
 
         if (comm_rank != 0) {
             for (int i = 0; i < local_result.size(); i++){

@@ -14,7 +14,7 @@ DVector::DVector(std::vector<double> init) {
   }
 
   int k = init.size()/std::sqrt(comm_size);
-  offset = (int (comm_rank / std::sqrt(comm_size))) * k;
+  offset = (int (comm_rank % int (std::sqrt(comm_size)))) * k;
 
   std::vector<double> local_init(init.begin() + offset, init.begin() + offset + k);
 
@@ -36,13 +36,13 @@ std::ostream &operator<<(std::ostream &os, const DVector &vec) {
     for (int i = 1; i < sqrt_size; i++){
       for (int j = 0; j < vec.data.size(); j++){
         int received = 0;
-        MPI_Recv(&received, 1, MPI_INT, i * sqrt_size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&received, 1, MPI_INT, i , 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         os << ", ";
         os << received;
       } 
     } 
     os << ")^T\n";
-  } else if (vec.comm_rank % int(std::sqrt(vec.comm_size)) == 0)
+  } else if (vec.comm_rank / int(std::sqrt(vec.comm_size)) == 0)
   {
     for (int i = 0; i < vec.data.size(); i++){
       int current = vec.data(i);
