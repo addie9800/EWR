@@ -5,6 +5,12 @@
 #include "distributed/DVector.hpp"
 #include <cmath>
 
+void mult(DCSCMatrix A, DVector b) {
+  auto c = A * b;
+  std::cout << c;
+
+}
+
 int main(int argc, char *argv[]) {
 
   int size, rank;
@@ -34,7 +40,7 @@ int main(int argc, char *argv[]) {
     }
   }
   if (rank == 0){
-    std::cout << rank << " Matrix " << CSCMatrix{n,n,triplets} << "\n"; 
+    std::cout << rank << " Matrix: \n" << CSCMatrix{n,n,triplets} << "\n"; 
   } 
   // create vector data (0, 1, 2, 3, 4, ..., n-1)
   std::vector<double> b_vals(n);
@@ -44,8 +50,7 @@ int main(int argc, char *argv[]) {
   DVector b = DVector(b_vals);
   std::cout << b;
   // SpMV and print result
-  auto c = A * b;
-  std::cout << c;
+  mult(A,b);
 
   // expected result:
   // for p=4: (8 1 2 3 4 5)

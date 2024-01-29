@@ -36,11 +36,11 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
         throw std::invalid_argument("Dimension mismatch!");
         return rhs;
     }*/
+    std::cout << "Test";
     int comm_size;
     int comm_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
-    std::cout << "Test";
     DenseVector local_result = data * rhs.data;
     int local_manager = comm_rank - (comm_rank % int(std::sqrt(comm_size)));
     std::vector<double> result(rhs.data.size() * int(std::sqrt(comm_size)));
@@ -58,35 +58,40 @@ DVector DCSCMatrix::operator*(const DVector &rhs) const {
                 local_result(i) += current_recv;
             }
         }
+        
 
-        for (int i = 0; i < local_result.size(); i++){
-            int current = local_result(i);
-            MPI_Send(&current, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        }
+        if (comm_rank != 0) {
+            for (int i = 0; i < local_result.size(); i++){
+                int current = local_result(i);
+                MPI_Send(&current, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+            }
+        } else {
+            for (int i = 0; i < local_result.size(); i++) {
+                result[i] = local_result(i);
+            }
 
-        if (comm_rank == 0) {
-            
-            for (int j = 0; j < int(std::sqrt(comm_size)); j++) {
+            for (int j = 1; j < int(std::sqrt(comm_size)); j++) {
                 int current_rank = j * int(std::sqrt(comm_size));
                 for (int i = 0; i < local_result.size(); i++){
                     int current_recv = 0;
                     MPI_Recv(&current_recv, 1, MPI_INT, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    result[current_rank + i] = current_recv;
+                    result[local_result.size() * j + i] = current_recv;
                 }
             }
             for (int j = 0; j < result.size(); j++){
                 int current = result.at(j);
-                MPI_Bcast(&current, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                for (int i = 0; i < comm_size; i++) {
+                    MPI_Send(&current, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+                }
+                //MPI_Bcast(&current, 1, MPI_INT, 0, MPI_COMM_WORLD);
             } 
-            std::cout << comm_rank;
-            return DVector(result);
         }
     }
     if(comm_rank > 0){
         for (int j = 0; j < result.size(); j++){
             int current_recv = 0;
             MPI_Recv(&current_recv, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            result.at(j) = current_recv;
+            result[j] = current_recv;
         } 
     }
     std::cout << comm_rank;
