@@ -26,14 +26,14 @@ std::ostream &operator<<(std::ostream &os, const DVector &vec) {
     } 
     int sqrt_size = int(std::sqrt(vec.comm_size));
     for (int i = 1; i < sqrt_size; i++){
-      for (int j = 0; j < vec.comm_size; j++){
+      for (int j = 0; j < vec.data.size(); j++){
         int received = 0;
         MPI_Recv(&received, 1, MPI_INT, i * sqrt_size, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         os << ", ";
-        os << vec.data(j);
+        os << received;
       } 
     } 
-    os << ")";
+    os << ")^T\n";
   } else if (vec.comm_rank % int(std::sqrt(vec.comm_size)) == 0)
   {
     for (int i = 0; i < vec.data.size(); i++){
